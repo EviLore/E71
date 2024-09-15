@@ -1,39 +1,49 @@
 # -*- coding: utf-8 -*-
+MAX_QUALITY = 50
+MIN_QUALITY = 0
+SULFURAS = "Sulfuras, Hand of Ragnaros"
+BACKSTAGE = "Backstage passes to a TAFKAL80ETC concert"
+AGED_BRIE = "Aged Brie"
+INCREASING_QUALITY_ITEMS = {AGED_BRIE, BACKSTAGE}
+
 
 class GildedRose(object):
 
     def __init__(self, items):
         self.items = items
 
+
     def update_quality(self):
         for item in self.items:
-            if item.name != "Aged Brie" and item.name != "Backstage passes to a TAFKAL80ETC concert":
-                if item.quality > 0:
-                    if item.name != "Sulfuras, Hand of Ragnaros":
-                        item.quality = item.quality - 1
+            if item.name == SULFURAS:
+                continue
+            if item.name not in INCREASING_QUALITY_ITEMS:
+                self.decrement_quality(item)
             else:
-                if item.quality < 50:
-                    item.quality = item.quality + 1
-                    if item.name == "Backstage passes to a TAFKAL80ETC concert":
+                if item.quality < MAX_QUALITY:
+                    item.quality += 1
+                    if item.name == BACKSTAGE:
                         if item.sell_in < 11:
-                            if item.quality < 50:
-                                item.quality = item.quality + 1
+                            self.increment_quality(item)
                         if item.sell_in < 6:
-                            if item.quality < 50:
-                                item.quality = item.quality + 1
-            if item.name != "Sulfuras, Hand of Ragnaros":
-                item.sell_in = item.sell_in - 1
+                            self.increment_quality(item)
+            item.sell_in -= 1
             if item.sell_in < 0:
-                if item.name != "Aged Brie":
-                    if item.name != "Backstage passes to a TAFKAL80ETC concert":
-                        if item.quality > 0:
-                            if item.name != "Sulfuras, Hand of Ragnaros":
-                                item.quality = item.quality - 1
+                if item.name != AGED_BRIE:
+                    if item.name != BACKSTAGE:
+                        self.decrement_quality(item)
                     else:
-                        item.quality = item.quality - item.quality
+                        item.quality = MIN_QUALITY
                 else:
-                    if item.quality < 50:
-                        item.quality = item.quality + 1
+                    self.increment_quality(item)
+
+    def decrement_quality(self, item):
+        if item.quality > MIN_QUALITY:
+            item.quality -= 1
+
+    def increment_quality(self, item):
+        if item.quality < MAX_QUALITY:
+            item.quality += 1
 
 
 class Item:
